@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 class User {
   final String firstName;
@@ -8,11 +9,12 @@ class User {
   final String imageUrl;
   final String email;
 
-  User(
-      {required this.firstName,
-      required this.secondName,
-      required this.imageUrl,
-      required this.email});
+  User({
+    required this.firstName,
+    required this.secondName,
+    required this.imageUrl,
+    required this.email,
+  });
 }
 
 class HomePage extends StatefulWidget {
@@ -80,75 +82,44 @@ class _HomePageState extends State<HomePage> {
 
           List<User> users = snapshot.data!.docs.map((doc) {
             return User(
-                firstName: doc['firstname'],
-                secondName: doc['secondname'],
-                imageUrl: doc['imageurl'],
-                email: doc['email']);
+              firstName: doc['firstname'],
+              secondName: doc['secondname'],
+              imageUrl: doc['imageurl'],
+              email: doc['email'],
+            );
           }).toList();
 
           return ListView.builder(
             itemCount: users.length,
             itemBuilder: (context, index) {
               User user = users[index];
-              if (user.email == currentUserEmail) {
-                return SizedBox.shrink();
-              }
 
-              Stream<QuerySnapshot> lastMessageStream = FirebaseFirestore
-                  .instance
-                  .collection('Messages')
-                  .where('chatId',
-                      isEqualTo: generateChatId(currentUserEmail!, user.email))
-                  .orderBy('createdtime', descending: true)
-                  .limit(1)
+              Stream<DocumentSnapshot> chatStream = FirebaseFirestore.instance
+                  .collection('chats')
+                  .doc(generateChatId(currentUserEmail!, user.email))
                   .snapshots();
 
-              return StreamBuilder<QuerySnapshot>(
-                stream: lastMessageStream,
+              return StreamBuilder<DocumentSnapshot>(
+                stream: chatStream,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Column(
-                      children: [
-                        ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(user.imageUrl),
-                          ),
-                          title: Text("${user.firstName} ${user.secondName}"),
-                          subtitle: Text('Loading...'),
-                          onTap: () {
-                            Navigator.pushNamed(context, 'chat', arguments: {
-                              'currentUserEmail': currentUserEmail,
-                              'otherUserEmail': user.email,
-                              'otherUserName':
-                                  "${user.firstName} ${user.secondName}",
-                              'otherUserImageUrl': user.imageUrl,
-                            });
-                            print("${user.email} ${currentUserEmail}");
-                          },
-                        ),
-                        Divider(
-                          color: Colors.grey,
-                          thickness: 0.5,
-                          indent: 16.0,
-                          endIndent: 16.0,
-                        ),
-                      ],
-                    );
+                    return CircularProgressIndicator();
                   }
 
-                  // Get the last message document
-                  QueryDocumentSnapshot? lastMessageDoc =
-                      snapshot.data!.docs.isNotEmpty
-                          ? snapshot.data!.docs.first
-                          : null;
-
-                  String lastMessageText = lastMessageDoc != null
-                      ? lastMessageDoc['Message']
+                  DocumentSnapshot chatDoc = snapshot.data!;
+                  String lastMessageText = chatDoc.exists
+                      ? chatDoc['lastMessage']
                       : 'No messages yet';
+                  String lastdate = chatDoc.exists
+                      ? _formatTimestamp(chatDoc['timestamp'])
+                      : '';
+                  if (lastMessageText == 'No messages yet') {
+                    return SizedBox.shrink();
+                  }
 
                   return Column(
                     children: [
@@ -158,6 +129,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                         title: Text("${user.firstName} ${user.secondName}"),
                         subtitle: Text(lastMessageText),
+                        trailing: Text(lastdate),
                         onTap: () {
                           Navigator.pushNamed(context, 'chat', arguments: {
                             'currentUserEmail': currentUserEmail,
@@ -185,6 +157,12 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+String _formatTimestamp(Timestamp timestamp) {
+  DateTime dateTime = timestamp.toDate();
+  String formattedDate = DateFormat('HH:mm').format(dateTime);
+  return formattedDate;
 }
 
 String generateChatId(String email1, String email2) {

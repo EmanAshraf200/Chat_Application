@@ -20,7 +20,6 @@ class _Login_PageState extends State<Login_Page> {
         action: SnackBarAction(
           label: 'Close',
           onPressed: () {
-            // You can add any action here when the "Close" button is pressed.
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
           },
         ),
@@ -38,9 +37,8 @@ class _Login_PageState extends State<Login_Page> {
         password: password,
       );
       print(credential.user!.uid);
-      //  Navigator.pushNamed(context, 'chat', arguments: email);
-      Navigator.pushNamed(context, 'home');
-      // showMySnackbar(context, 'Success');
+
+      Navigator.pushNamed(context, 'ChatApp');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         showMySnackbar(context, 'No user found for that email.');
@@ -71,7 +69,7 @@ class _Login_PageState extends State<Login_Page> {
                 colors: [
                   const Color.fromARGB(255, 165, 153, 200),
                   const Color.fromARGB(255, 96, 62, 191)
-                ], // Replace with your desired gradient colors
+                ],
               ),
             ),
             child: Form(
@@ -79,27 +77,26 @@ class _Login_PageState extends State<Login_Page> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Spacer(flex: 5),
+                  Spacer(flex: 4),
                   Center(
                     child: Container(
                       child: Image.asset(
-                        'assets/images/scholar.png',
-                        width: 180,
-                        height: 180,
+                        "assets/images/3d-smartphone-function-icon-illustration-png.webp",
+                        width: 300,
+                        height: 200,
                         fit: BoxFit.contain,
                       ),
                     ),
                   ),
                   Center(
                     child: Text(
-                      'ScholarChat',
+                      'Talky',
                       style: TextStyle(
                           fontSize: 35,
                           color: Colors.white,
                           fontFamily: 'Pacifico'),
                     ),
                   ),
-                  Spacer(flex: 2),
                   Padding(
                     padding: EdgeInsets.all(15),
                     child: Text(

@@ -37,7 +37,7 @@ class _Regestration_PageState extends State<Regestration_Page> {
       );
 
       print(credential.user!.uid);
-      Navigator.pushNamed(context, 'home');
+      Navigator.pushNamed(context, 'ChatApp');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         showMySnackbar(context, 'The password provided is too weak.');
@@ -81,8 +81,8 @@ class _Regestration_PageState extends State<Regestration_Page> {
                   Center(
                     child: Container(
                       child: Image.asset(
-                        'assets/images/scholar.png',
-                        width: 180,
+                        "assets/images/3d-smartphone-function-icon-illustration-png.webp",
+                        width: 300,
                         height: 180,
                         fit: BoxFit.contain,
                       ),
@@ -90,7 +90,7 @@ class _Regestration_PageState extends State<Regestration_Page> {
                   ),
                   Center(
                     child: Text(
-                      'ScholarChat',
+                      'Talky',
                       style: TextStyle(
                           fontSize: 35,
                           color: Colors.white,
